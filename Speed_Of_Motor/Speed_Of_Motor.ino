@@ -7,12 +7,15 @@
 
 const int ENCA_A=0;
 const int ENCA_B=1;
-const int in_1=6;
-const int in_2=7;
+const int in_1=4;
+const int in_2=5;
 volatile long count = 0;
 long previous_count = 0;
-unsigned long timeBetweenCalculations = 1000;
+unsigned long timeBetweenCalculation= 1000;
 unsigned long timeOfLastCalculation = 0;
+float speed=0;
+const int countsPerRevolution = 600; //number of encoder counts per revolution at the shaft
+
 
 void setup()
 {
@@ -27,16 +30,22 @@ void setup()
 
 void loop()
 {
+  digitalWrite(in_1, HIGH);
+  digitalWrite(in_2, LOW);
 unsigned long current_time=millis();
 //Serial.println(current_time);//for my reference
-if((current_time-timeOfLastCalculation)>=timeBetweenCalculations)
+if((current_time - timeOfLastCalculation)>=timeBetweenCalculation)
 {
   long change = count - previous_count; //The count used here is found from the count that is returned from interrupts. change: This is the change in encoder counts during the specified time interval. It tells you how many encoder counts have occurred during that time.
+  float speed = (float)change / countsPerRevolution * 60 / (timeBetweenCalculation / 1000.0); //calculated speed in RPM
   Serial.print(count);
   Serial.print(" ");
   Serial.println(change);
   previous_count=count;
   timeOfLastCalculation=current_time;
+  Serial.println(speed);
+  Serial.print("rpm")
+  
 }
 }
 
@@ -44,11 +53,11 @@ void channelAEvent()
 {
   if(digitalRead (ENCA_A)!= digitalRead(ENCA_B))
   {
-  count-=1;
+  count+=1;
 }
   else
   {
-  count+=1;
+  count-=1;
   }
 }
 void channelBEvent()
